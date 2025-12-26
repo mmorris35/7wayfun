@@ -7,6 +7,11 @@
 Terminal-based simulator for developing and testing the trailer tester
 firmware without physical hardware.
 
+Platform Support:
+    - macOS: Fully supported
+    - Linux: Fully supported
+    - Windows: Requires WSL or alternative terminal (uses Unix termios)
+
 Usage:
     python run_simulator.py
 
@@ -19,6 +24,12 @@ Controls:
     r - Running lights preset
     b - Braking preset
     q - Quit
+
+Features:
+    - Real-time display updates at 10 FPS (prevents flickering)
+    - Responsive keyboard input (50ms polling)
+    - Clean terminal state restoration on exit
+    - Interactive signal control and testing
 
 Author: Mike Morris
 License: GNU GPL v3
@@ -236,24 +247,36 @@ def main():
     
     print("Simulator ready. Press any key to start...")
     
-    # Main UI loop
+    # Main UI loop with frame rate limiting
+    REFRESH_RATE = 10  # FPS - prevents flickering and excessive CPU usage
+    frame_time = 1.0 / REFRESH_RATE
+
     try:
-        # Set terminal to raw mode for single-char input
+        # Set terminal to raw mode for single-char input (Unix-only)
         import tty
         import termios
-        
+
         old_settings = termios.tcgetattr(sys.stdin)
         try:
             tty.setcbreak(sys.stdin.fileno())
-            
+
             while ui.running:
+                frame_start = time.time()
+
+                # Draw UI
                 ui.draw()
-                
-                # Wait for input with timeout
-                if select.select([sys.stdin], [], [], 0.2)[0]:
+
+                # Wait for input with short timeout
+                input_timeout = 0.05  # 50ms for responsive input
+                if select.select([sys.stdin], [], [], input_timeout)[0]:
                     char = sys.stdin.read(1)
                     ui.handle_input(char)
-                
+
+                # Limit frame rate to prevent excessive CPU and flickering
+                elapsed = time.time() - frame_start
+                if elapsed < frame_time:
+                    time.sleep(frame_time - elapsed)
+
         finally:
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
     
