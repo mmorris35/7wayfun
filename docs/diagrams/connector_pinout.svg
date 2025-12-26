@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <style>
+      .title { font: bold 24px sans-serif; fill: #333; }
+      .subtitle { font: 18px sans-serif; fill: #666; }
+      .pin-label { font: bold 14px monospace; fill: #fff; }
+      .function-label { font: 14px sans-serif; fill: #333; }
+      .wire-color { font: italic 12px sans-serif; fill: #666; }
+      .note { font: 12px sans-serif; fill: #666; }
+      .pin-circle { stroke: #333; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="40" class="title" text-anchor="middle">7-Way Trailer Connector Pinout</text>
+  <text x="400" y="65" class="subtitle" text-anchor="middle">SAE J2863 Standard</text>
+
+  <!-- Connector outline -->
+  <circle cx="400" cy="300" r="180" fill="none" stroke="#333" stroke-width="3"/>
+  <circle cx="400" cy="300" r="165" fill="none" stroke="#999" stroke-width="1"/>
+
+  <!-- Pin 1 - Ground (Center) -->
+  <circle cx="400" cy="300" r="35" class="pin-circle" fill="#ffffff"/>
+  <text x="400" y="308" class="pin-label" fill="#000" text-anchor="middle">1</text>
+  <text x="400" y="380" class="function-label" text-anchor="middle">Ground</text>
+  <text x="400" y="398" class="wire-color" text-anchor="middle">White</text>
+
+  <!-- Pin 2 - Electric Brakes (Top) -->
+  <circle cx="400" cy="140" r="30" class="pin-circle" fill="#0066cc"/>
+  <text x="400" y="148" class="pin-label" text-anchor="middle">2</text>
+  <text x="400" y="90" class="function-label" text-anchor="middle">Electric Brakes</text>
+  <text x="400" y="108" class="wire-color" text-anchor="middle">Blue</text>
+
+  <!-- Pin 3 - Tail/Running (Top Right) -->
+  <g transform="rotate(51.4 400 300)">
+    <circle cx="400" cy="140" r="30" class="pin-circle" fill="#8B4513"/>
+    <text x="400" y="148" class="pin-label" text-anchor="middle">3</text>
+  </g>
+  <text x="530" y="185" class="function-label" text-anchor="start">Tail/Running</text>
+  <text x="530" y="203" class="wire-color" text-anchor="start">Brown</text>
+
+  <!-- Pin 4 - Left Turn (Bottom Right) -->
+  <g transform="rotate(102.9 400 300)">
+    <circle cx="400" cy="140" r="30" class="pin-circle" fill="#FFD700"/>
+    <text x="400" y="148" class="pin-label" text-anchor="middle">4</text>
+  </g>
+  <text x="530" y="345" class="function-label" text-anchor="start">Left Turn</text>
+  <text x="530" y="363" class="wire-color" text-anchor="start">Yellow</text>
+
+  <!-- Pin 5 - Right Turn (Bottom Left) -->
+  <g transform="rotate(-102.9 400 300)">
+    <circle cx="400" cy="140" r="30" class="pin-circle" fill="#228B22"/>
+    <text x="400" y="148" class="pin-label" text-anchor="middle">5</text>
+  </g>
+  <text x="270" y="345" class="function-label" text-anchor="end">Right Turn</text>
+  <text x="270" y="363" class="wire-color" text-anchor="end">Green</text>
+
+  <!-- Pin 6 - Auxiliary (Top Left) -->
+  <g transform="rotate(-51.4 400 300)">
+    <circle cx="400" cy="140" r="30" class="pin-circle" fill="#DC143C"/>
+    <text x="400" y="148" class="pin-label" text-anchor="middle">6</text>
+  </g>
+  <text x="270" y="185" class="function-label" text-anchor="end">12V Auxiliary</text>
+  <text x="270" y="203" class="wire-color" text-anchor="end">Red</text>
+
+  <!-- Pin 7 - Reverse (Bottom) -->
+  <g transform="rotate(180 400 300)">
+    <circle cx="400" cy="140" r="30" class="pin-circle" fill="#800080"/>
+    <text x="400" y="148" class="pin-label" text-anchor="middle">7</text>
+  </g>
+  <text x="400" y="490" class="function-label" text-anchor="middle">Reverse Lights</text>
+  <text x="400" y="508" class="wire-color" text-anchor="middle">Purple</text>
+
+  <!-- Notes -->
+  <text x="50" y="550" class="note">View from rear of female connector (trailer side)</text>
+  <text x="50" y="570" class="note">Male connector (vehicle side) is mirror image</text>
+
+  <!-- Legend -->
+  <rect x="600" y="450" width="150" height="120" fill="none" stroke="#999" stroke-width="1"/>
+  <text x="675" y="470" class="subtitle" text-anchor="middle">Legend</text>
+  <circle cx="620" cy="490" r="8" fill="#0066cc"/>
+  <text x="635" y="495" class="note">Signal wire</text>
+  <circle cx="620" cy="510" r="8" fill="#ffffff" stroke="#333" stroke-width="1"/>
+  <text x="635" y="515" class="note">Ground</text>
+  <line x1="610" y1="530" x2="740" y2="530" stroke="#999" stroke-width="1"/>
+  <text x="620" y="545" class="note" font-size="10">Pin numbers per</text>
+  <text x="620" y="560" class="note" font-size="10">SAE J2863 standard</text>
+</svg>

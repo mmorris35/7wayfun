@@ -22,6 +22,17 @@ Built with Adafruit components:
 
 See [`docs/HARDWARE_DESIGN.md`](docs/HARDWARE_DESIGN.md) for full specifications and [`docs/SHOPPING_LIST.md`](docs/SHOPPING_LIST.md) for part numbers.
 
+### Circuit Diagrams
+
+📐 Interactive circuit diagrams viewable in GitHub:
+- [System Architecture](docs/diagrams/system_architecture.md) - Complete Mermaid block diagram
+- [Voltage Divider](docs/diagrams/voltage_divider.svg) - ADC input scaling
+- [Power Supply](docs/diagrams/power_supply.svg) - 12V → 5V/3.3V conversion
+- [I2C Bus](docs/diagrams/i2c_bus.svg) - Device topology
+- [Connector Pinout](docs/diagrams/connector_pinout.svg) - SAE J2863 standard
+
+All diagrams in [`docs/diagrams/`](docs/diagrams/)
+
 ## Quick Start
 
 ### Desktop Simulation (No Hardware Required)
