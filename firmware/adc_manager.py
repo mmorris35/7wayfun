@@ -32,13 +32,13 @@ class ADCManager:
         Board 0: 0x48 (ADDR pin to GND)
         Board 1: 0x49 (ADDR pin to VDD)
     
-    Channel Mapping:
+    Channel Mapping (RV 7-Way Standard):
         Board 0, Channel 0: Brake (Blue)
-        Board 0, Channel 1: Tail (Brown)
-        Board 0, Channel 2: Left Turn (Yellow)
-        Board 0, Channel 3: Right Turn (Green)
-        Board 1, Channel 0: Aux 12V (Red)
-        Board 1, Channel 1: Reverse (Purple)
+        Board 0, Channel 1: Tail (Green)
+        Board 0, Channel 2: Left Turn (Red)
+        Board 0, Channel 3: Right Turn (Brown)
+        Board 1, Channel 0: Aux 12V (Black)
+        Board 1, Channel 1: Reverse (Yellow)
         Board 1, Channel 2: Spare
         Board 1, Channel 3: Spare
     """
@@ -104,52 +104,59 @@ class ADCManager:
     def read_raw(self, board_idx, channel):
         """
         Read raw ADC value from a specific channel.
-        
+
         Args:
             board_idx: Index of the ADS1115 board (0 or 1)
             channel: Channel number on that board (0-3)
-        
+
         Returns:
             Raw 16-bit ADC value
+
+        Raises:
+            ValueError: If board_idx or channel is out of range
         """
+        if board_idx not in [0, 1]:
+            raise ValueError("Invalid board_idx: {}, must be 0 or 1".format(board_idx))
+        if channel not in range(4):
+            raise ValueError("Invalid channel: {}, must be 0-3".format(channel))
+
         channel_key = (board_idx, channel)
-        
-        if channel_key not in self.channels:
-            self.logger.error(f"Invalid channel: board={board_idx}, channel={channel}")
-            return 0
-        
         return self.channels[channel_key].value
     
     def read_voltage(self, board_idx, channel):
         """
         Read voltage from a channel, scaled to actual input voltage.
-        
+
         This applies the voltage divider scaling factor to convert the
         ADC reading back to the original 12V-scale input voltage.
-        
+
         Args:
             board_idx: Index of the ADS1115 board (0 or 1)
             channel: Channel number on that board (0-3)
-        
+
         Returns:
             Actual input voltage (0-15V range, approximately)
+
+        Raises:
+            ValueError: If board_idx or channel is out of range
         """
+        if board_idx not in [0, 1]:
+            raise ValueError("Invalid board_idx: {}, must be 0 or 1".format(board_idx))
+        if channel not in range(4):
+            raise ValueError("Invalid channel: {}, must be 0-3".format(channel))
+
         channel_key = (board_idx, channel)
-        
-        if channel_key not in self.channels:
-            self.logger.error(f"Invalid channel: board={board_idx}, channel={channel}")
-            return 0.0
-        
+
         # Get voltage at ADC input (after divider)
         adc_voltage = self.channels[channel_key].voltage
-        
+
         # Scale back to original input voltage
         input_voltage = adc_voltage * self.VOLTAGE_SCALE
-        
+
         # Apply noise floor - readings below this are considered zero
         if input_voltage < self.NOISE_FLOOR:
             input_voltage = 0.0
-        
+
         return input_voltage
     
     def read_all_channels(self):
@@ -177,14 +184,17 @@ class ADCManager:
     def is_channel_active(self, board_idx, channel, threshold=3.0):
         """
         Check if a channel has voltage above a threshold.
-        
+
         Args:
             board_idx: Index of the ADS1115 board (0 or 1)
             channel: Channel number on that board (0-3)
             threshold: Voltage threshold (default 3.0V)
-        
+
         Returns:
             True if voltage exceeds threshold
+
+        Raises:
+            ValueError: If board_idx or channel is out of range
         """
         voltage = self.read_voltage(board_idx, channel)
         return voltage >= threshold

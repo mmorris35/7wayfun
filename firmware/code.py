@@ -139,20 +139,42 @@ class TrailerTester:
                 self._trigger_test()
         self.test_button_last = test_current
     
+    def _exit_mode(self, mode):
+        """Clean exit from current mode."""
+        self.logger.debug("Exiting mode: {}".format(mode.name))
+
+        # Always turn off all relays for safety
+        self.relays.all_off()
+
+        # Clear all channel NeoPixel states (LEDs 1-7)
+        # LED 0 (status) will be updated by enter_mode()
+        for channel_idx in range(1, 8):
+            self.neopixels.set_channel_idle(channel_idx)
+
+    def _enter_mode(self, mode):
+        """Initialize new mode state."""
+        self.logger.info("Entering mode: {}".format(mode.name))
+
+        # Update display immediately
+        self.display.show_mode(mode)
+
+        # Set NeoPixel mode indicator on LED 0
+        self.neopixels.set_mode_indicator(mode)
+
     def _cycle_mode(self):
         """Cycle to the next operating mode."""
+        # Exit current mode with cleanup
+        self._exit_mode(self.current_mode)
+
+        # Cycle to next mode
         modes = list(TestMode)
         current_idx = modes.index(self.current_mode)
         next_idx = (current_idx + 1) % len(modes)
         self.current_mode = modes[next_idx]
-        
-        self.logger.info(f"Mode changed to: {self.current_mode.name}")
-        self.display.show_mode(self.current_mode)
-        self.neopixels.set_mode_indicator(self.current_mode)
-        
-        # Turn off all relays when changing modes for safety
-        self.relays.all_off()
-    
+
+        # Enter new mode with initialization
+        self._enter_mode(self.current_mode)
+
     def _trigger_test(self):
         """Trigger test sequence based on current mode."""
         self.logger.info(f"Test triggered in mode: {self.current_mode.name}")
