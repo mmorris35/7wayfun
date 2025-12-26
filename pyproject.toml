@@ -1,0 +1,53 @@
+[project]
+name = "trailer-tester"
+version = "0.1.0"
+description = "7-way trailer wiring controller tester with CircuitPython"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    {name = "Mike Morris"}
+]
+keywords = ["trailer", "tester", "circuitpython", "adafruit", "automotive"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Hardware",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B"]
+ignore = [
+    "E501",  # Line too long (handled by formatter)
+    "N806",  # Variable in function should be lowercase (conflicts with CircuitPython conventions)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"simulator/mock_*.py" = ["N802", "N803"]  # Mock modules can use CircuitPython naming
+
+[tool.pytest.ini_options]
+testpaths = ["simulator"]
+python_files = ["test_*.py"]
+addopts = "-v"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

@@ -1,0 +1,11 @@
+# Simulator requirements
+# These are only needed for desktop simulation, not for the actual CircuitPython device
+
+# No external dependencies required for basic simulation!
+# The simulator uses only Python standard library.
+
+# Optional: For enhanced terminal UI
+# rich>=13.0.0
+
+# Optional: For running pytest-style tests
+# pytest>=7.0.0
