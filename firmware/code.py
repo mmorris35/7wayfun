@@ -264,34 +264,67 @@ class TrailerTester:
         
         # Update display with readings
         self.display.show_voltage_readings(readings)
-        
+
         return readings
-    
+
+    def _check_passthrough_integrity(self, readings):
+        """
+        Check signal integrity in pass-through mode.
+
+        Detects degraded signals and updates display/NeoPixels accordingly.
+
+        Args:
+            readings: Dict of channel_name -> voltage
+        """
+        integrity = PassThroughTester.check_all_signals(readings)
+
+        if not integrity['all_ok']:
+            # Log warnings
+            for warning in integrity['warnings']:
+                self.logger.warn("Signal integrity: {}".format(warning))
+
+            # Update NeoPixels for degraded channels (yellow/dim)
+            for channel_name in integrity['degraded']:
+                channel = self.CHANNELS[channel_name]
+                pixel_idx = channel["relay_idx"] + 1
+                # Set to warning color (yellow/orange for degraded)
+                self.neopixels.set_pixel(pixel_idx, (255, 128, 0))  # Orange
+
+            # Show warning on display (first degraded channel)
+            if integrity['degraded']:
+                degraded_list = ", ".join(integrity['degraded'])
+                self.display.show_message("WEAK: {}".format(degraded_list))
+
     def run(self):
         """Main application loop."""
         self.logger.info("Entering main loop")
         self.display.show_mode(self.current_mode)
         self.neopixels.set_mode_indicator(self.current_mode)
-        
+
         last_reading_time = 0
         reading_interval = 0.25  # Read voltages every 250ms
-        
+
         try:
             while self.running:
                 current_time = time.monotonic()
-                
+
                 # Check for button presses
                 self.check_buttons()
-                
+
                 # In vehicle tester or pass-through mode, continuously read inputs
                 if self.current_mode in (TestMode.VEHICLE_TESTER, TestMode.PASS_THROUGH):
                     if current_time - last_reading_time >= reading_interval:
-                        self._read_all_channels()
+                        readings = self._read_all_channels()
+
+                        # In pass-through mode, check signal integrity
+                        if self.current_mode == TestMode.PASS_THROUGH:
+                            self._check_passthrough_integrity(readings)
+
                         last_reading_time = current_time
-                
+
                 # Small delay to prevent tight loop
                 time.sleep(0.02)
-                
+
         except KeyboardInterrupt:
             self.logger.info("Shutdown requested")
         finally:

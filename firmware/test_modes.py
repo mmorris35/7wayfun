@@ -180,28 +180,67 @@ class TrailerTester:
 class PassThroughTester:
     """
     Pass-through monitoring mode handler.
-    
+
     In this mode, both vehicle and trailer are connected. The tester
     monitors signals passing from vehicle to trailer in real-time.
     """
-    
+
+    # Voltage thresholds for signal integrity
+    NORMAL_VOLTAGE = 11.0   # Expected voltage for active signal
+    DEGRADED_VOLTAGE = 9.0  # Below this is considered degraded
+
     @staticmethod
     def check_signal_integrity(vehicle_voltage, expected_at_trailer):
         """
         Check if a signal is passing through correctly.
-        
+
         Args:
             vehicle_voltage: Voltage measured from vehicle side
             expected_at_trailer: What voltage should be at trailer
-        
+
         Returns:
             Tuple of (is_ok, message)
         """
         diff = abs(vehicle_voltage - expected_at_trailer)
-        
+
         if diff < 0.5:
             return (True, "OK")
         elif diff < 2.0:
             return (True, "VOLTAGE DROP")
         else:
             return (False, "SIGNAL LOSS")
+
+    @staticmethod
+    def check_all_signals(readings):
+        """
+        Check integrity of all active signals in readings dict.
+
+        Detects degraded signals (active but below normal voltage) which
+        may indicate bad connections or wiring issues.
+
+        Args:
+            readings: Dict of channel_name -> voltage
+
+        Returns:
+            Dict with:
+                'all_ok': True if all signals are good
+                'degraded': List of channel names with degraded signals
+                'warnings': List of warning messages
+        """
+        degraded = []
+        warnings = []
+
+        for channel_name, voltage in readings.items():
+            # Only check active signals (above threshold)
+            if voltage > 3.0:
+                if voltage < PassThroughTester.DEGRADED_VOLTAGE:
+                    degraded.append(channel_name)
+                    warnings.append("{}: {:.1f}V (degraded)".format(channel_name, voltage))
+                elif voltage < PassThroughTester.NORMAL_VOLTAGE:
+                    warnings.append("{}: {:.1f}V (weak)".format(channel_name, voltage))
+
+        return {
+            'all_ok': len(degraded) == 0,
+            'degraded': degraded,
+            'warnings': warnings
+        }
