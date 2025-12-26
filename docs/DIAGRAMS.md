@@ -90,18 +90,18 @@ Relay switching for trailer output signals
 
 ### [7-Way Connector Pinout](diagrams/connector_pinout.svg)
 
-SAE J2863 standard trailer connector
+RV 7-Way standard trailer connector for camping trailers, travel trailers, and RVs
 
 ![Connector Pinout](diagrams/connector_pinout.svg)
 
 **Pin Assignments:**
 1. **Ground** - White (center pin)
 2. **Electric Brakes** - Blue
-3. **Tail/Running** - Brown
-4. **Left Turn** - Yellow
-5. **Right Turn** - Green
-6. **12V Auxiliary** - Red
-7. **Reverse Lights** - Purple
+3. **Tail/Running** - Green
+4. **Left Turn** - Red
+5. **Right Turn** - Brown
+6. **12V Auxiliary** - Black
+7. **Reverse Lights** - Yellow
 
 ---
 

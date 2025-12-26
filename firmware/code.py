@@ -32,15 +32,19 @@ logger.info("7-Way Trailer Tester starting up...")
 
 class TrailerTester:
     """Main application class for the 7-way trailer tester."""
-    
-    # Channel definitions matching hardware design
+
+    # Button timing constants (in milliseconds)
+    DEBOUNCE_MS = 50
+    LONG_PRESS_MS = 2000
+
+    # Channel definitions matching RV 7-Way standard
     CHANNELS = {
-        "brake": {"pin": 1, "color": "blue", "relay_idx": 0, "adc_board": 0, "adc_chan": 0},
-        "tail": {"pin": 2, "color": "yellow", "relay_idx": 1, "adc_board": 0, "adc_chan": 1},
-        "left": {"pin": 3, "color": "yellow", "relay_idx": 2, "adc_board": 0, "adc_chan": 2},
-        "right": {"pin": 4, "color": "green", "relay_idx": 3, "adc_board": 0, "adc_chan": 3},
-        "aux": {"pin": 5, "color": "red", "relay_idx": 4, "adc_board": 1, "adc_chan": 0},
-        "reverse": {"pin": 6, "color": "purple", "relay_idx": 5, "adc_board": 1, "adc_chan": 1},
+        "brake": {"pin": 2, "color": "blue", "relay_idx": 0, "adc_board": 0, "adc_chan": 0},
+        "tail": {"pin": 3, "color": "green", "relay_idx": 1, "adc_board": 0, "adc_chan": 1},
+        "left": {"pin": 4, "color": "red", "relay_idx": 2, "adc_board": 0, "adc_chan": 2},
+        "right": {"pin": 5, "color": "brown", "relay_idx": 3, "adc_board": 0, "adc_chan": 3},
+        "aux": {"pin": 6, "color": "black", "relay_idx": 4, "adc_board": 1, "adc_chan": 0},
+        "reverse": {"pin": 7, "color": "yellow", "relay_idx": 5, "adc_board": 1, "adc_chan": 1},
     }
     
     def __init__(self):
@@ -89,27 +93,50 @@ class TrailerTester:
         self.mode_button.direction = digitalio.Direction.INPUT
         self.mode_button.pull = digitalio.Pull.UP
         self.mode_button_last = True
-        
+        self._mode_press_time = 0
+
         # Test/Action button on D25
         self.test_button = digitalio.DigitalInOut(board.D25)
         self.test_button.direction = digitalio.Direction.INPUT
         self.test_button.pull = digitalio.Pull.UP
         self.test_button_last = True
-        
+        self._test_press_start = 0
+        self._long_press_triggered = False
+
         self.logger.debug("Buttons initialized")
     
     def check_buttons(self):
-        """Poll buttons and handle presses."""
-        # Mode button - cycle through modes
+        """Poll buttons with debounce and long-press detection."""
+        current_time = time.monotonic() * 1000  # Convert to milliseconds
+
+        # Mode button - simple press with debounce
         mode_current = self.mode_button.value
         if not mode_current and self.mode_button_last:
-            self._cycle_mode()
+            # Button pressed (goes LOW when pressed due to pull-up)
+            if current_time - self._mode_press_time > self.DEBOUNCE_MS:
+                self._cycle_mode()
+                # Visual feedback
+                self.neopixels.blink_all((255, 255, 255), count=1, on_time=0.05, off_time=0.0)
+                self._mode_press_time = current_time
         self.mode_button_last = mode_current
-        
-        # Test button - trigger action based on mode
+
+        # Test button - detect press start for long-press timing
         test_current = self.test_button.value
         if not test_current and self.test_button_last:
-            self._trigger_test()
+            # Button just pressed
+            self._test_press_start = current_time
+            self._long_press_triggered = False
+        elif not test_current and not self.test_button_last:
+            # Button held - check for long press
+            hold_time = current_time - self._test_press_start
+            if hold_time > self.LONG_PRESS_MS and not self._long_press_triggered:
+                self._trigger_full_test()
+                self._long_press_triggered = True
+        elif test_current and not self.test_button_last:
+            # Button released
+            hold_time = current_time - self._test_press_start
+            if hold_time < self.LONG_PRESS_MS and not self._long_press_triggered:
+                self._trigger_test()
         self.test_button_last = test_current
     
     def _cycle_mode(self):
@@ -129,13 +156,36 @@ class TrailerTester:
     def _trigger_test(self):
         """Trigger test sequence based on current mode."""
         self.logger.info(f"Test triggered in mode: {self.current_mode.name}")
-        
+
         if self.current_mode == TestMode.TRAILER_TESTER:
             self._run_trailer_test_sequence()
         elif self.current_mode == TestMode.VEHICLE_TESTER:
             # In vehicle mode, test button forces a refresh/detailed read
             self._read_all_channels(detailed=True)
-    
+
+    def _trigger_full_test(self):
+        """Trigger comprehensive full system test (long press)."""
+        self.logger.info("Full system test triggered (long press detected)")
+
+        # Visual indication of full test starting
+        self.neopixels.blink_all((0, 255, 255), count=3, on_time=0.1, off_time=0.1)
+        self.display.show_message("FULL TEST")
+        time.sleep(1.0)
+
+        # Always run the full trailer test sequence for comprehensive testing
+        self._run_trailer_test_sequence()
+
+        # If in vehicle mode, also do a detailed channel read
+        if self.current_mode == TestMode.VEHICLE_TESTER:
+            time.sleep(0.5)
+            self.display.show_message("Reading inputs...")
+            time.sleep(1.0)
+            self._read_all_channels(detailed=True)
+
+        # Final indication
+        self.neopixels.blink_all((0, 255, 0), count=2, on_time=0.15, off_time=0.15)
+        self.logger.info("Full system test complete")
+
     def _run_trailer_test_sequence(self):
         """Run through all outputs to test trailer lights."""
         self.logger.info("Starting trailer test sequence...")

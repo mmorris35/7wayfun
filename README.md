@@ -29,7 +29,7 @@ See [`docs/HARDWARE_DESIGN.md`](docs/HARDWARE_DESIGN.md) for full specifications
 - [Voltage Divider](docs/diagrams/voltage_divider.svg) - ADC input scaling
 - [Power Supply](docs/diagrams/power_supply.svg) - 12V → 5V/3.3V conversion
 - [I2C Bus](docs/diagrams/i2c_bus.svg) - Device topology
-- [Connector Pinout](docs/diagrams/connector_pinout.svg) - SAE J2863 standard
+- [Connector Pinout](docs/diagrams/connector_pinout.svg) - RV 7-Way Standard
 
 All diagrams in [`docs/diagrams/`](docs/diagrams/)
 
@@ -83,17 +83,17 @@ trailer-tester/
 └── CLAUDE.md
 ```
 
-## 7-Way Connector Pinout
+## 7-Way Connector Pinout (RV 7-Way Standard)
 
 | Pin | Function | Wire Color |
 |-----|----------|------------|
 | 1 | Ground | White |
 | 2 | Electric Brakes | Blue |
-| 3 | Tail/Running Lights | Brown |
-| 4 | Left Turn/Brake | Yellow |
-| 5 | Right Turn/Brake | Green |
-| 6 | 12V Auxiliary | Red |
-| 7 | Reverse Lights | Purple |
+| 3 | Tail/Running Lights | Green |
+| 4 | Left Turn/Brake | Red |
+| 5 | Right Turn/Brake | Brown |
+| 6 | 12V Auxiliary | Black |
+| 7 | Reverse Lights | Yellow |
 
 ## Development
 

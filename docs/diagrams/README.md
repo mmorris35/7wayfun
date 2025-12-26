@@ -16,7 +16,7 @@ This directory contains circuit diagrams for the trailer-tester project. All dia
 - **full_schematic.svg** - Complete breadboard schematic
 
 ### Connector Diagrams
-- **connector_pinout.svg** - 7-way connector pinout (SAE J2863)
+- **connector_pinout.svg** - 7-way connector pinout (RV 7-Way Standard)
 
 ## Generation
 

@@ -64,17 +64,17 @@
 - Centralized logging in all modules
 - Descriptive variable names (no single letters)
 
-## 7-Way Connector Pinout (SAE J2863)
+## 7-Way Connector Pinout (RV 7-Way Standard)
 
 | Pin | Function | Wire Color | Test Method |
 |-----|----------|------------|-------------|
 | 1 | Ground | White | Reference (not tested) |
 | 2 | Electric Brakes | Blue | ADC + Relay |
-| 3 | Tail/Running | Brown | ADC + Relay |
-| 4 | Left Turn/Brake | Yellow | ADC + Relay |
-| 5 | Right Turn/Brake | Green | ADC + Relay |
-| 6 | 12V Auxiliary | Red | ADC + Relay |
-| 7 | Reverse Lights | Purple | ADC + Relay |
+| 3 | Tail/Running | Green | ADC + Relay |
+| 4 | Left Turn/Brake | Red | ADC + Relay |
+| 5 | Right Turn/Brake | Brown | ADC + Relay |
+| 6 | 12V Auxiliary | Black | ADC + Relay |
+| 7 | Reverse Lights | Yellow | ADC + Relay |
 
 ## Success Criteria
 
