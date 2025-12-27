@@ -37,6 +37,12 @@ All diagrams in [`docs/diagrams/`](docs/diagrams/)
 
 ### Desktop Simulation (No Hardware Required)
 
+**Quick Launch (macOS/Linux):**
+```bash
+./launch_simulator.sh
+```
+
+**Manual Launch:**
 ```bash
 # Clone the repo
 git clone https://github.com/yourusername/trailer-tester.git
@@ -47,7 +53,16 @@ python3 simulator/test_firmware.py
 
 # Launch interactive simulator
 python3 simulator/run_simulator.py
+# Or use: make sim
 ```
+
+**Simulator Controls:**
+- `m` - Press mode button
+- `t` - Press test button
+- `1-6` - Toggle signals (brake/tail/left/right/aux/reverse)
+- `a` - All signals ON, `o` - All OFF
+- `r` - Running lights, `b` - Braking preset
+- `q` - Quit
 
 ### On Hardware
 
