@@ -7,6 +7,7 @@ A bidirectional 7-way trailer wiring controller tester built with Adafruit Circu
 - **Vehicle Tester Mode** - Plug into tow vehicle, read and display voltage on all 6 trailer circuits
 - **Trailer Tester Mode** - Plug into trailer, output 12V test signals to verify lights work
 - **Pass-Through Mode** - Connect both, monitor signals in real-time
+- **Automatic Fault Diagnosis** - Detects common wiring issues (voltage drops, ground faults, cross-wiring) and suggests fixes
 - **NeoPixel Status Display** - Color-coded LEDs show circuit status at a glance
 - **OLED Information Display** - 128x64 screen shows mode, voltages, and status
 - **Desktop Simulator** - Develop and test firmware without hardware
@@ -84,6 +85,7 @@ trailer-tester/
 │   ├── relay_manager.py
 │   ├── neopixel_manager.py
 │   ├── display_manager.py
+│   ├── diagnostics.py # Automatic fault diagnosis
 │   └── test_modes.py
 ├── simulator/          # Desktop simulation
 │   ├── mock_*.py      # Mock hardware modules

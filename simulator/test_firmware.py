@@ -199,40 +199,128 @@ def test_test_modes():
     print("Test modes test PASSED")
 
 
+def test_diagnostics():
+    """Test the diagnostics engine."""
+    print("\n=== Testing Diagnostics Engine ===")
+
+    from diagnostics import DiagnosticsEngine, FaultPattern, DiagnosticHistory
+
+    engine = DiagnosticsEngine()
+
+    # Test 1: No faults (all signals normal)
+    normal_readings = {
+        "brake": 12.0,
+        "tail": 11.5,
+        "left": 12.1,
+        "right": 0.0,
+        "aux": 13.2,
+        "reverse": 0.0,
+    }
+    faults = engine.analyze_readings(normal_readings)
+    assert len(faults) == 0, "Should detect no faults in normal readings"
+
+    # Test 2: Voltage drop detection (severe)
+    # Use only one active channel to avoid ground fault detection
+    severe_drop = {
+        "brake": 5.5,  # Active but severely degraded
+        "tail": 0.0,
+        "left": 0.0,
+        "right": 0.0,
+        "aux": 0.0,
+        "reverse": 0.0,
+    }
+    faults = engine.analyze_readings(severe_drop)
+    assert len(faults) > 0, "Should detect voltage drop"
+    assert any(f.name == "VOLTAGE_DROP" for f in faults), f"Expected VOLTAGE_DROP, got {[f.name for f in faults]}"
+    voltage_drop_fault = [f for f in faults if f.name == "VOLTAGE_DROP"][0]
+    assert voltage_drop_fault.confidence >= 80, "Voltage drop should have high confidence"
+
+    # Test 3: Voltage drop detection
+    voltage_drop = normal_readings.copy()
+    voltage_drop["tail"] = 7.5  # Significant drop
+    faults = engine.analyze_readings(voltage_drop)
+    assert len(faults) > 0, "Should detect voltage drop"
+    assert any(f.name == "VOLTAGE_DROP" for f in faults), "Should have voltage drop fault"
+
+    # Test 4: Weak signal detection
+    weak_signal = normal_readings.copy()
+    weak_signal["left"] = 10.0  # Below 11V but above 9V
+    faults = engine.analyze_readings(weak_signal)
+    assert len(faults) > 0, "Should detect weak signal"
+    assert any(f.name == "WEAK_SIGNAL" for f in faults), "Should have weak signal fault"
+
+    # Test 5: Ground fault detection (all channels low)
+    ground_fault = {
+        "brake": 8.5,
+        "tail": 8.2,
+        "left": 8.7,
+        "right": 8.3,
+        "aux": 8.6,
+        "reverse": 0.0,
+    }
+    faults = engine.analyze_readings(ground_fault)
+    ground_faults = [f for f in faults if f.name == "GROUND_FAULT"]
+    assert len(ground_faults) > 0, "Should detect ground fault when all channels are low"
+    assert ground_faults[0].confidence >= 85, "Ground fault should have high confidence"
+
+    # Test 6: Diagnostic history
+    history = DiagnosticHistory(max_history=10)
+
+    # Add some readings with intermittent fault
+    for i in range(10):
+        readings = normal_readings.copy()
+        if i % 3 == 0:  # Fault appears 33% of the time
+            readings["brake"] = 9.5  # Weak signal
+
+        faults = engine.analyze_readings(readings)
+        history.add_reading(timestamp=i, readings=readings, faults=faults)
+
+    # Check if intermittent fault is detected
+    is_intermittent = history.detect_intermittent_fault("WEAK_SIGNAL")
+    assert is_intermittent == True, "Should detect intermittent fault"
+
+    # Test 7: Fault report formatting
+    report = engine.format_diagnosis_report(faults)
+    assert "FAULT DIAGNOSIS REPORT" in report, "Report should have header"
+    assert "Suggested Fixes" in report, "Report should include suggested fixes"
+
+    print("Diagnostics engine test PASSED")
+
+
 def test_integration():
     """Test full integration of components."""
     print("\n=== Integration Test ===")
-    
+
     sim_state = get_simulation_state()
-    
+
     # Reset state
     sim_state.set_all_signals_off()
-    
+
     # Simulate a vehicle with running lights and left turn
     sim_state.set_running_lights()
     sim_state.set_left_turn()
-    
+
     # Import the full application
     # Note: This will print log messages
     print("Loading firmware application...")
-    
+
     from code import TrailerTester as FirmwareApp
-    
+
     app = FirmwareApp()
-    
+
     # Manually trigger a read
     readings = app._read_all_channels()
-    
+
     print(f"Integration readings: {readings}")
-    
+
     # Check that readings match what we set
     assert readings["tail"] > 10.0, "Tail lights should be on"
     assert readings["left"] > 10.0, "Left turn should be on"
     assert readings["right"] < 1.0, "Right turn should be off"
-    
+
     # Cleanup
     app.shutdown()
-    
+
     print("Integration test PASSED")
 
 
@@ -241,7 +329,7 @@ def main():
     print("=" * 60)
     print("  TRAILER TESTER FIRMWARE TESTS")
     print("=" * 60)
-    
+
     tests = [
         test_logger,
         test_neopixel_manager,
@@ -249,6 +337,7 @@ def main():
         test_adc_manager,
         test_display_manager,
         test_test_modes,
+        test_diagnostics,
         test_integration,
     ]
     

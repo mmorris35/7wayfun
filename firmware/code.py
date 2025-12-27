@@ -23,6 +23,7 @@ from neopixel_manager import NeoPixelManager
 from adc_manager import ADCManager
 from relay_manager import RelayManager
 from test_modes import TestMode, VehicleTester, TrailerTester, PassThroughTester
+from diagnostics import DiagnosticsEngine
 
 
 # Initialize logging first
@@ -50,16 +51,19 @@ class TrailerTester:
     def __init__(self):
         self.logger = Logger(name="app", level=LogLevel.DEBUG)
         self.logger.info("Initializing trailer tester application...")
-        
+
         self.current_mode = TestMode.VEHICLE_TESTER
         self.running = True
-        
+
         # Initialize hardware managers
         self._init_hardware()
-        
+
         # Initialize mode button
         self._init_buttons()
-        
+
+        # Initialize diagnostics engine
+        self.diagnostics = DiagnosticsEngine()
+
         self.logger.info("Initialization complete")
     
     def _init_hardware(self):
@@ -295,6 +299,41 @@ class TrailerTester:
                 degraded_list = ", ".join(integrity['degraded'])
                 self.display.show_message("WEAK: {}".format(degraded_list))
 
+    def _run_diagnostics(self, readings):
+        """
+        Run automatic fault diagnosis on voltage readings.
+
+        Analyzes readings for common faults and displays top issue if found.
+
+        Args:
+            readings: Dict of channel_name -> voltage
+        """
+        faults = self.diagnostics.analyze_readings(readings, mode=self.current_mode)
+
+        if faults:
+            # Log all detected faults
+            for fault in faults:
+                self.logger.warn("Fault detected: {} ({}% confidence)".format(
+                    fault.name, fault.confidence
+                ))
+                self.logger.debug("  Description: {}".format(fault.description))
+
+            # Display the highest-confidence fault on OLED
+            top_fault = faults[0]
+            self.display.show_message("FAULT: {}".format(top_fault.description[:40]))
+
+            # Set NeoPixels to red for affected channels in fault description
+            # This is a simple heuristic - look for channel names in the description
+            for channel_name in self.CHANNELS.keys():
+                if channel_name in top_fault.description.lower():
+                    channel = self.CHANNELS[channel_name]
+                    pixel_idx = channel["relay_idx"] + 1
+                    self.neopixels.set_pixel(pixel_idx, (255, 0, 0))  # Red for fault
+
+            return faults
+
+        return []
+
     def run(self):
         """Main application loop."""
         self.logger.info("Entering main loop")
@@ -302,7 +341,9 @@ class TrailerTester:
         self.neopixels.set_mode_indicator(self.current_mode)
 
         last_reading_time = 0
+        last_diagnostics_time = 0
         reading_interval = 0.25  # Read voltages every 250ms
+        diagnostics_interval = 2.0  # Run diagnostics every 2 seconds
 
         try:
             while self.running:
@@ -319,6 +360,12 @@ class TrailerTester:
                         # In pass-through mode, check signal integrity
                         if self.current_mode == TestMode.PASS_THROUGH:
                             self._check_passthrough_integrity(readings)
+
+                        # In vehicle tester mode, run periodic diagnostics
+                        if self.current_mode == TestMode.VEHICLE_TESTER:
+                            if current_time - last_diagnostics_time >= diagnostics_interval:
+                                self._run_diagnostics(readings)
+                                last_diagnostics_time = current_time
 
                         last_reading_time = current_time
 

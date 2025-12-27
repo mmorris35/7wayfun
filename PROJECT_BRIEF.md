@@ -24,15 +24,16 @@
 1. **Vehicle Tester Mode** - Plug into tow vehicle's 7-way connector, read and display voltage on all 6 circuits (brake, tail, left, right, aux, reverse)
 2. **Trailer Tester Mode** - Plug into trailer, output 12V test signals to cycle through and verify each trailer light circuit
 3. **Pass-Through Mode** - Connect both vehicle and trailer, monitor signals in real-time as they pass through
-4. **NeoPixel Status Display** - 8-LED strip showing color-coded status for each circuit (active, idle, fault)
-5. **OLED Information Display** - 128x64 display showing current mode, voltage readings, and status messages
-6. **Desktop Simulator** - Mock hardware for firmware development and testing without physical components
+4. **Automatic Fault Diagnosis** - Analyzes voltage readings to detect common wiring faults (voltage drops, weak signals, cross-wiring, ground faults) with confidence scoring and suggested fixes
+5. **NeoPixel Status Display** - 8-LED strip showing color-coded status for each circuit (active, idle, fault)
+6. **OLED Information Display** - 128x64 display showing current mode, voltage readings, and status messages
+7. **Desktop Simulator** - Mock hardware for firmware development and testing without physical components
 
 ### Nice-to-Have (v2)
 
 - Data logging to SD card for diagnostic history
 - Bluetooth connectivity for mobile app integration
-- Automatic fault diagnosis with suggested fixes
+- Diagnostic trend analysis for intermittent faults
 - Production PCB design (replace breadboard prototype)
 
 ## Technical Requirements

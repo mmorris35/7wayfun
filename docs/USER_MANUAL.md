@@ -101,6 +101,92 @@ The tester has three modes. Press the **Mode button** to cycle through them.
 
 ---
 
+## Automatic Fault Diagnosis
+
+**Feature:** The tester automatically analyzes voltage readings in Vehicle Tester mode to detect common wiring faults.
+
+### How It Works
+
+- Runs every 2 seconds in Vehicle Tester mode
+- Analyzes active channels (voltage > 3V) for issues
+- Reports highest-confidence fault on OLED display
+- Lights affected channels RED on NeoPixel strip
+- Logs all detected faults with confidence scores
+
+### Detected Faults
+
+**1. Voltage Drop (85% confidence)**
+- **Symptom:** Active channel reads 3V-9V (severely degraded)
+- **Cause:** High resistance connection, corroded pins, loose wiring
+- **Display:** "FAULT: [Channel] shows X.XV - significant voltage drop"
+- **Suggested Fixes:**
+  - Clean connector pins with electrical contact cleaner
+  - Check for loose connections
+  - Inspect wire for damage or corrosion
+  - Verify adequate wire gauge (16-18 AWG minimum)
+  - Check ground connection (Pin 1, White wire)
+  - Apply dielectric grease to prevent corrosion
+
+**2. Weak Signal (70% confidence)**
+- **Symptom:** Active channel reads 9V-11V (below normal)
+- **Cause:** Battery voltage low, poor ground, high-resistance connections
+- **Display:** "FAULT: [Channel] reads X.XV - below normal (11-12V expected)"
+- **Suggested Fixes:**
+  - Check battery voltage (should be 12.6V resting)
+  - Clean connector contacts
+  - Verify ground connection quality
+  - Check for high-resistance connections
+  - Inspect wire run for excessive length
+
+**3. Ground Fault (90% confidence)**
+- **Symptom:** All active channels read low (average < 11V)
+- **Cause:** Poor ground connection, corroded ground wire, inadequate ground strap
+- **Display:** "FAULT: All channels read low (X.XV avg) - likely ground issue"
+- **Suggested Fixes:**
+  - Inspect ground wire (Pin 1, White) connection
+  - Clean ground connection at trailer frame
+  - Verify ground wire is securely attached
+  - Check for rust/corrosion at ground point
+  - Install additional ground strap if needed
+  - Verify ground wire gauge is adequate
+
+**4. Possible Cross-Wiring (60% confidence)**
+- **Symptom:** Left and Right turn signals both active simultaneously (not hazards)
+- **Cause:** Wires swapped at connector, short circuit between signals
+- **Display:** "FAULT: Left and Right turn signals both active - possible cross-wiring"
+- **Suggested Fixes:**
+  - Verify this is not hazard lights mode
+  - Check wire colors: Left=Red(Pin 4), Right=Brown(Pin 5)
+  - Inspect connector for crossed pins
+  - Verify trailer wiring matches RV 7-Way standard
+  - Check for short circuit between left/right wires
+
+### Visual Indicators
+
+When a fault is detected:
+- **OLED Display:** Shows "FAULT: [description]" message (truncated to 40 chars)
+- **NeoPixels:** Affected channels turn RED
+- **Logging:** All faults logged with confidence scores to console
+
+### Example Fault Report
+
+```
+WARN  [app] Fault detected: VOLTAGE_DROP (85% confidence)
+DEBUG [app]   Description: Brake (Blue) shows 7.5V - significant voltage drop
+```
+
+### Troubleshooting False Positives
+
+**If diagnostics reports faults incorrectly:**
+1. Verify calibration is correct (see `CALIBRATION_PROCEDURE.md`)
+2. Check ADC readings are stable (not fluctuating)
+3. Ensure proper ground connection on tester itself
+4. Verify voltage divider resistors are correct values (10K + 2.7K)
+
+**Note:** Diagnostics only analyze channels that are currently active (> 3V). Inactive channels are not checked to avoid false "open circuit" alarms.
+
+---
+
 ## Display Reference
 
 ### OLED Screen Layout
